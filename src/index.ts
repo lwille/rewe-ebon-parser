@@ -14,7 +14,6 @@ export async function parseEBon(dataBuffer: Buffer): Promise<Receipt> {
         .filter(line => line !== '');
 
     let date: Date = new Date(),
-        market: string = '?',
         cashier: string = '?',
         checkout: string = '?',
         uid: string = '?',
@@ -28,6 +27,8 @@ export async function parseEBon(dataBuffer: Buffer): Promise<Receipt> {
         paybackRevenue: number = Number.NaN,
         paybackCardNumber: string = '?',
         paybackCoupons: PaybackCoupon[] = [],
+        receiptId: string = '?',
+        market: string = '?',
         usedREWECredit: number = Number.NaN,
         newREWECredit: number = Number.NaN,
         taxDetails: TaxDetails = {
@@ -198,7 +199,7 @@ export async function parseEBon(dataBuffer: Buffer): Promise<Receipt> {
                 tax: parseFloat(totalTaxMatch[2].replace(',', '.')),
                 gross: parseFloat(totalTaxMatch[3].replace(',', '.')),
             };
-            
+
             return;
         }
 
@@ -209,7 +210,7 @@ export async function parseEBon(dataBuffer: Buffer): Promise<Receipt> {
         }
 
         const newREWECreditMatch = line.match(/Neues REWE Guthaben: ([0-9,]*) EUR/);
-        
+
         if (newREWECreditMatch) {
             newREWECredit = parseFloat(newREWECreditMatch[1].replace(',', '.'));
         }
@@ -224,14 +225,16 @@ export async function parseEBon(dataBuffer: Buffer): Promise<Receipt> {
     }
 
     return {
-        date: date,
-        market: market,
-        cashier: cashier,
-        checkout: checkout,
+        cashier,
+        checkout,
+        date,
+        given,
+        items,
+        market,
+        receiptId,
+        taxDetails,
+        total,
         vatin: uid,
-        items: items,
-        total: total,
-        given: given,
         change: change ? change : undefined,
         payout: payout ? payout : undefined,
         payback: paybackCardNumber ? ({
@@ -249,6 +252,5 @@ export async function parseEBon(dataBuffer: Buffer): Promise<Receipt> {
             usedREWECredit: usedREWECredit ? usedREWECredit : undefined,
             newREWECredit: !isNaN(newREWECredit) ? newREWECredit : undefined
         }) : undefined,
-        taxDetails: taxDetails
     };
 }

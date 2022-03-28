@@ -32,6 +32,8 @@ export type Payment = {
 }
 
 export type Receipt = {
+    receiptId: string,
+
     /** Date and time of the purchase */
     date: Date,
 
